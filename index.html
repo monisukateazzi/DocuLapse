@@ -1,0 +1,1034 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>DocuLapse Mobile Pro</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            background-color: #f8f9fa;
+            margin: 0;
+            padding: 0;
+            display: flex;
+            flex-direction: column;
+            height: 100vh;
+            overflow: hidden;
+            user-select: none;
+        }
+
+        .screen {
+            display: flex;
+            flex-direction: column;
+            height: 100%;
+            width: 100%;
+            position: absolute;
+            top: 0;
+            left: 0;
+            background-color: #ffffff;
+        }
+
+        #dashboardScreen {
+            z-index: 10;
+            background-color: #f8f9fa;
+        }
+
+        #editorScreen {
+            z-index: 5;
+            display: none;
+            background-color: #ffffff;
+        }
+
+        .dash-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 12px 16px;
+            background-color: #ffffff;
+        }
+
+        .search-bar {
+            flex: 1;
+            background-color: #f1f3f4;
+            padding: 10px 16px;
+            border-radius: 24px;
+            margin: 0 12px;
+            color: #5f6368;
+            font-size: 16px;
+        }
+
+        .profile-icon {
+            width: 32px;
+            height: 32px;
+            background-color: #00701a;
+            color: white;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            font-size: 14px;
+        }
+
+        .content-title {
+            padding: 16px;
+            font-size: 14px;
+            color: #5f6368;
+            font-weight: 500;
+        }
+
+        .file-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 16px;
+            padding: 0 16px;
+            overflow-y: auto;
+            flex: 1;
+        }
+
+        .file-card {
+            background: white;
+            border: 1px solid #dadce0;
+            border-radius: 8px;
+            overflow: hidden;
+            height: 160px;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .file-preview {
+            flex: 1;
+            background-color: #f8f9fa;
+            border-bottom: 1px solid #dadce0;
+            padding: 8px;
+            font-size: 5px;
+            color: #c0c0c0;
+            overflow: hidden;
+        }
+
+        .file-info {
+            padding: 10px;
+            font-size: 13px;
+            color: #3c4043;
+            font-weight: 500;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        .fab-btn {
+            position: fixed;
+            bottom: 24px;
+            right: 24px;
+            width: 56px;
+            height: 56px;
+            background-color: #ffffff;
+            border-radius: 16px;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.2);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            z-index: 12;
+        }
+
+        .fab-icon {
+            width: 24px;
+            height: 24px;
+            position: relative;
+        }
+
+        .fab-icon::before, .fab-icon::after {
+            content: '';
+            position: absolute;
+            background-color: #1a73e8;
+        }
+
+        .fab-icon::before {
+            top: 11px;
+            left: 0;
+            width: 24px;
+            height: 2px;
+        }
+
+        .fab-icon::after {
+            top: 0;
+            left: 11px;
+            width: 2px;
+            height: 24px;
+        }
+
+        .editor-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 10px 12px;
+            border-bottom: 1px solid #dadce0;
+            background-color: #ffffff;
+        }
+
+        .header-left, .header-right {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .title-input {
+            border: none;
+            outline: none;
+            font-size: 18px;
+            color: #3c4043;
+            font-weight: 400;
+            width: 140px;
+            background: transparent;
+        }
+
+        .title-input:focus {
+            border-bottom: 2px solid #1a73e8;
+        }
+
+        .btn-icon {
+            background: none;
+            border: none;
+            padding: 6px;
+            cursor: pointer;
+            font-size: 18px;
+            color: #5f6368;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .btn-check {
+            color: #1a73e8;
+            font-weight: bold;
+        }
+
+        .workspace {
+            flex: 1;
+            overflow-y: auto;
+            padding: 16px;
+            position: relative;
+            background-color: #ffffff;
+        }
+
+        .rich-editor, .playback-area {
+            width: 100%;
+            height: 100%;
+            min-height: 70vh;
+            border: none;
+            outline: none;
+            font-size: 16px;
+            line-height: 1.15;
+            color: #000000;
+            word-wrap: break-word;
+            padding: 0;
+            margin: 0;
+            background: transparent;
+        }
+
+        .playback-area {
+            display: none;
+            position: absolute;
+            top: 16px;
+            left: 16px;
+            right: 16px;
+            background-color: #ffffff;
+            z-index: 2;
+        }
+
+        .quick-toolbar {
+            display: flex;
+            align-items: center;
+            gap: 4px;
+            padding: 6px 8px;
+            border-top: 1px solid #dadce0;
+            background-color: #ffffff;
+            overflow-x: auto;
+            white-space: nowrap;
+        }
+
+        .quick-btn {
+            background: none;
+            border: none;
+            font-size: 16px;
+            color: #5f6368;
+            padding: 8px 10px;
+            cursor: pointer;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            position: relative;
+            flex-shrink: 0;
+            min-width: 38px;
+            height: 38px;
+            border-radius: 4px;
+            box-sizing: border-box;
+        }
+
+        .quick-btn.active {
+            background-color: #e8f0fe;
+            color: #1a73e8;
+        }
+
+        .color-underline {
+            width: 16px;
+            height: 3px;
+            background-color: #ea4335;
+            margin-top: 2px;
+        }
+
+        #hiddenColorPicker {
+            position: absolute;
+            opacity: 0;
+            width: 100%;
+            height: 100%;
+            top: 0;
+            left: 0;
+            cursor: pointer;
+        }
+
+        .v-separator {
+            width: 1px;
+            height: 24px;
+            background-color: #dadce0;
+            margin: 0 6px;
+            flex-shrink: 0;
+        }
+
+        .bottom-panel-overlay {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0,0,0,0.4);
+            z-index: 20;
+        }
+
+        .bottom-sheet {
+            display: none;
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            width: 100%;
+            background-color: #ffffff;
+            border-radius: 28px 28px 0 0;
+            box-shadow: 0 -4px 16px rgba(0,0,0,0.1);
+            z-index: 21;
+            padding: 24px;
+            box-sizing: border-box;
+            max-height: 85vh;
+            overflow-y: auto;
+        }
+
+        .sheet-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+
+        .sheet-title {
+            font-size: 20px;
+            color: #1f1f1f;
+            font-weight: 400;
+        }
+
+        .sheet-close {
+            font-size: 20px;
+            color: #5f6368;
+            cursor: pointer;
+        }
+
+        .format-section {
+            margin-bottom: 20px;
+        }
+
+        .format-row {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 12px;
+        }
+
+        .grid-options {
+            display: flex;
+            background-color: #f1f3f4;
+            border-radius: 8px;
+            padding: 4px;
+            width: 100%;
+            justify-content: space-between;
+            gap: 4px;
+        }
+
+        .grid-btn {
+            flex: 1;
+            background: none;
+            border: none;
+            padding: 10px 6px;
+            font-size: 14px;
+            color: #444746;
+            cursor: pointer;
+            border-radius: 6px;
+            text-align: center;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .grid-btn.active {
+            background-color: #ffffff;
+            color: #1a73e8;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+        }
+
+        .option-select {
+            border: none;
+            background-color: #f1f3f4;
+            padding: 10px 14px;
+            border-radius: 8px;
+            font-size: 14px;
+            color: #444746;
+            width: 55%;
+            outline: none;
+        }
+
+        .stepper {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            background-color: #f1f3f4;
+            border-radius: 8px;
+            padding: 4px;
+        }
+
+        .step-btn {
+            width: 32px;
+            height: 32px;
+            border-radius: 6px;
+            border: none;
+            background-color: #ffffff;
+            color: #444746;
+            font-size: 18px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            box-shadow: 0 1px 2px rgba(0,0,0,0.05);
+        }
+
+        .step-value {
+            font-size: 14px;
+            color: #444746;
+            min-width: 32px;
+            text-align: center;
+        }
+
+        .color-picker-wrapper {
+            display: flex;
+            gap: 8px;
+            overflow-x: auto;
+            padding: 4px 0;
+        }
+
+        .color-dot {
+            width: 36px;
+            height: 36px;
+            border-radius: 50%;
+            cursor: pointer;
+            box-sizing: border-box;
+            flex-shrink: 0;
+            border: 2px solid transparent;
+        }
+
+        .color-dot.active {
+            border-color: #1a73e8;
+            transform: scale(1.1);
+        }
+
+        .lapse-controls {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+            width: 100%;
+        }
+
+        .btn-lapse {
+            width: 100%;
+            border: none;
+            padding: 12px;
+            border-radius: 8px;
+            font-size: 14px;
+            font-weight: bold;
+            cursor: pointer;
+            text-align: center;
+            box-sizing: border-box;
+        }
+
+        .btn-lapse-play {
+            background-color: #1a73e8;
+            color: white;
+        }
+
+        .btn-lapse-save {
+            background-color: #34a853;
+            color: white;
+        }
+
+        .btn-lapse-reset {
+            background-color: #f1f3f4;
+            color: #b3261e;
+        }
+
+        .mode-status-bar {
+            background-color: #e8f0fe;
+            color: #1a73e8;
+            padding: 6px 16px;
+            font-size: 12px;
+            font-weight: 500;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .mode-status-bar.playback {
+            background-color: #fde7e9;
+            color: #b3261e;
+        }
+
+        .stats-container {
+            background-color: #f1f3f4;
+            border-radius: 8px;
+            padding: 14px;
+            font-size: 14px;
+            color: #1f1f1f;
+            margin-bottom: 20px;
+            line-height: 1.6;
+        }
+
+        .stats-title {
+            font-weight: bold;
+            color: #1a73e8;
+            margin-bottom: 4px;
+        }
+    </style>
+</head>
+<body>
+
+<div id="dashboardScreen" class="screen">
+    <div class="dash-header">
+        <span style="font-size: 20px; color: #5f6368;">☰</span>
+        <div class="search-bar">Search Docs</div>
+        <div class="profile-icon">G</div>
+    </div>
+    <div class="content-title">Recent documents</div>
+    <div class="file-grid">
+        <div class="file-card">
+            <div class="file-preview">Document content preview system tracking timeline snapshot active build database...</div>
+            <div class="file-info">Selection Tasks for Project</div>
+        </div>
+        <div class="file-card">
+            <div class="file-preview">Programming laboratory contest dynamic programming tree structure verification...</div>
+            <div class="file-info">Soal Pemrograman</div>
+        </div>
+    </div>
+    <div id="fabCreate" class="fab-btn">
+        <div class="fab-icon"></div>
+    </div>
+</div>
+
+<div id="editorScreen" class="screen">
+    <div class="editor-header">
+        <div class="header-left">
+            <button id="btnBack" class="btn-icon btn-check">✓</button>
+            <input type="text" id="docTitleInput" class="title-input" value="Untitled document">
+        </div>
+        <div class="header-right">
+            <button id="btnUndo" class="btn-icon"><i class="fa-solid fa-arrow-rotate-left"></i></button>
+            <button id="btnRedo" class="btn-icon"><i class="fa-solid fa-arrow-rotate-right"></i></button>
+            <button id="btnOpenFormat" class="btn-icon" style="font-size: 20px;">A</button>
+        </div>
+    </div>
+
+    <div id="modeStatusBar" class="mode-status-bar">
+        <span>Recording active</span>
+        <span id="wordCountMobile">0 words</span>
+    </div>
+
+    <div class="workspace">
+        <div id="editor" class="rich-editor" contenteditable="true"></div>
+        <div id="playbackArea" class="playback-area"></div>
+    </div>
+
+    <div class="quick-toolbar">
+        <button id="quickBold" class="quick-btn" style="font-weight: bold;">B</button>
+        <button id="quickItalic" class="quick-btn" style="font-style: italic;">I</button>
+        <button id="quickUnderline" class="quick-btn" style="text-decoration: underline;">U</button>
+        <button id="quickColor" class="quick-btn">
+            <span>A</span>
+            <div id="quickColorLine" class="color-underline"></div>
+            <input type="color" id="hiddenColorPicker" value="#ea4335">
+        </button>
+        
+        <div class="v-separator"></div>
+        
+        <button id="quickAlignLeft" class="quick-btn"><i class="fa-solid fa-align-left"></i></button>
+        <button id="quickAlignCenter" class="quick-btn"><i class="fa-solid fa-align-center"></i></button>
+        <button id="quickAlignRight" class="quick-btn"><i class="fa-solid fa-align-right"></i></button>
+        
+        <div class="v-separator"></div>
+        
+        <button id="quickBulletList" class="quick-btn"><i class="fa-solid fa-list-ul"></i></button>
+        <button id="quickNumList" class="quick-btn"><i class="fa-solid fa-list-ol"></i></button>
+        
+        <button id="quickFormatSheet" class="quick-btn" style="font-size: 11px; font-weight: bold; color:#1a73e8; margin-left: auto;">LAINNYA</button>
+    </div>
+</div>
+
+<div id="panelOverlay" class="bottom-panel-overlay"></div>
+
+<div id="formatBottomSheet" class="bottom-sheet">
+    <div class="sheet-header">
+        <div class="sheet-title">Format</div>
+        <div id="closeFormatSheet" class="sheet-close">✕</div>
+    </div>
+
+    <div class="format-section">
+        <div class="format-row">
+            <div class="grid-options">
+                <button id="sheetBold" class="grid-btn" style="font-weight:bold;">B</button>
+                <button id="sheetItalic" class="grid-btn" style="font-style:italic;">I</button>
+                <button id="sheetUnderline" class="grid-btn" style="text-decoration:underline;">U</button>
+                <button id="sheetStrikethrough" class="grid-btn" style="text-decoration:line-through;">Ⲍ</button>
+                <button id="sheetSuperscript" class="grid-btn">X²</button>
+                <button id="sheetSubscript" class="grid-btn">X₂</button>
+            </div>
+        </div>
+    </div>
+
+    <div class="format-section">
+        <div style="font-size: 14px; color: #1f1f1f; margin-bottom: 12px;">Alignment & Indent</div>
+        <div class="format-row">
+            <div class="grid-options">
+                <button id="sheetAlignLeft" class="grid-btn"><i class="fa-solid fa-align-left"></i></button>
+                <button id="sheetAlignCenter" class="grid-btn"><i class="fa-solid fa-align-center"></i></button>
+                <button id="sheetAlignRight" class="grid-btn"><i class="fa-solid fa-align-right"></i></button>
+                <button id="sheetAlignJustify" class="grid-btn"><i class="fa-solid fa-align-justify"></i></button>
+            </div>
+        </div>
+        <div class="format-row">
+            <div class="grid-options">
+                <button id="sheetOutdent" class="grid-btn"><i class="fa-solid fa-outdent"></i> Decrease</button>
+                <button id="sheetIndent" class="grid-btn">Increase <i class="fa-solid fa-indent"></i></button>
+            </div>
+        </div>
+    </div>
+
+    <div class="format-section">
+        <div class="format-row">
+            <span style="font-size: 14px; color: #1f1f1f;">Font</span>
+            <select id="sheetFontFamily" class="option-select">
+                <option value="Arial">Arial</option>
+                <option value="Calibri">Calibri</option>
+                <option value="Times New Roman">Times New Roman</option>
+                <option value="Courier New">Courier New</option>
+            </select>
+        </div>
+        <div class="format-row">
+            <span style="font-size: 14px; color: #1f1f1f;">Size</span>
+            <div class="stepper">
+                <button id="decSize" class="step-btn">−</button>
+                <div id="sizeValue" class="step-value">16</div>
+                <button id="incSize" class="step-btn">+</button>
+            </div>
+        </div>
+    </div>
+
+    <div class="format-section">
+        <div style="font-size: 14px; color: #1f1f1f; margin-bottom: 12px;">Text color</div>
+        <div class="color-picker-wrapper">
+            <div class="color-dot active" style="background-color: #000000;" data-color="#000000"></div>
+            <div class="color-dot" style="background-color: #4285f4;" data-color="#4285f4"></div>
+            <div class="color-dot" style="background-color: #ea4335;" data-color="#ea4335"></div>
+            <div class="color-dot" style="background-color: #fbbc05;" data-color="#fbbc05"></div>
+            <div class="color-dot" style="background-color: #34a853;" data-color="#34a853"></div>
+        </div>
+    </div>
+
+    <div class="format-section">
+        <div style="font-size: 14px; color: #1f1f1f; margin-bottom: 12px;">Highlight color</div>
+        <div class="color-picker-wrapper">
+            <div class="color-dot active" style="background-color: #ffffff; border: 1px solid #dadce0;" data-bg="transparent"></div>
+            <div class="color-dot" style="background-color: #fef3d6;" data-bg="#fef3d6"></div>
+            <div class="color-dot" style="background-color: #e8f0fe;" data-bg="#e8f0fe"></div>
+            <div class="color-dot" style="background-color: #e6f4ea;" data-bg="#e6f4ea"></div>
+            <div class="color-dot" style="background-color: #fce8e6;" data-bg="#fce8e6"></div>
+        </div>
+    </div>
+
+    <div class="format-section">
+        <div class="format-row">
+            <span style="font-size: 14px; color: #1f1f1f;">Line spacing</span>
+            <div class="stepper">
+                <button id="decSpacing" class="step-btn">−</button>
+                <div id="spacingValue" class="step-value">1.15</div>
+                <button id="incSpacing" class="step-btn">+</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div id="lapseBottomSheet" class="bottom-sheet">
+    <div class="sheet-header">
+        <div class="sheet-title">Document Options</div>
+        <div id="closeLapseSheet" class="sheet-close">✕</div>
+    </div>
+
+    <div class="stats-container">
+        <div class="stats-title">Activity Log</div>
+        <div id="statsDuration">Writing Duration: 0h 0m 0s</div>
+    </div>
+
+    <div class="format-section">
+        <div class="format-row">
+            <span style="font-size: 14px; color: #1f1f1f;">Playback speed</span>
+            <select id="lapseSpeed" class="option-select">
+                <option value="2">2x Speed</option>
+                <option value="5" selected>5x Speed</option>
+                <option value="10">10x Speed</option>
+                <option value="20">20x Speed</option>
+            </select>
+        </div>
+    </div>
+
+    <div class="format-section" style="margin-top: 24px;">
+        <div class="lapse-controls">
+            <button id="btnLapsePlay" class="btn-lapse btn-lapse-play">Start Replay</button>
+            <button id="btnLapseSave" class="btn-lapse btn-lapse-save"><i class="fa-solid fa-cloud-arrow-down"></i> Save File to Device</button>
+            <button id="btnLapseReset" class="btn-lapse btn-lapse-reset">Reset & Exit</button>
+        </div>
+    </div>
+</div>
+
+<script>
+    const dashboardScreen = document.getElementById('dashboardScreen');
+    const editorScreen = document.getElementById('editorScreen');
+    const fabCreate = document.getElementById('fabCreate');
+    const btnBack = document.getElementById('btnBack');
+    const docTitleInput = document.getElementById('docTitleInput');
+    
+    const editor = document.getElementById('editor');
+    const playbackArea = document.getElementById('playbackArea');
+    const modeStatusBar = document.getElementById('modeStatusBar');
+    const wordCountMobile = document.getElementById('wordCountMobile');
+    
+    const panelOverlay = document.getElementById('panelOverlay');
+    const formatBottomSheet = document.getElementById('formatBottomSheet');
+    const lapseBottomSheet = document.getElementById('lapseBottomSheet');
+    
+    const btnOpenFormat = document.getElementById('btnOpenFormat');
+    const quickFormatSheet = document.getElementById('quickFormatSheet');
+    const closeFormatSheet = document.getElementById('closeFormatSheet');
+    
+    const quickBold = document.getElementById('quickBold');
+    const quickItalic = document.getElementById('quickItalic');
+    const quickUnderline = document.getElementById('quickUnderline');
+    const hiddenColorPicker = document.getElementById('hiddenColorPicker');
+    const quickColorLine = document.getElementById('quickColorLine');
+    
+    const sheetBold = document.getElementById('sheetBold');
+    const sheetItalic = document.getElementById('sheetItalic');
+    const sheetUnderline = document.getElementById('sheetUnderline');
+    const sheetStrikethrough = document.getElementById('sheetStrikethrough');
+    const sheetSuperscript = document.getElementById('sheetSuperscript');
+    const sheetSubscript = document.getElementById('sheetSubscript');
+    const sheetFontFamily = document.getElementById('sheetFontFamily');
+    
+    const decSize = document.getElementById('decSize');
+    const incSize = document.getElementById('incSize');
+    const sizeValue = document.getElementById('sizeValue');
+    
+    const decSpacing = document.getElementById('decSpacing');
+    const incSpacing = document.getElementById('incSpacing');
+    const spacingValue = document.getElementById('spacingValue');
+    
+    const btnLapsePlay = document.getElementById('btnLapsePlay');
+    const btnLapseSave = document.getElementById('btnLapseSave');
+    const btnLapseReset = document.getElementById('btnLapseReset');
+    const lapseSpeed = document.getElementById('lapseSpeed');
+    const closeLapseSheet = document.getElementById('closeLapseSheet');
+    const statsDuration = document.getElementById('statsDuration');
+
+    let keystrokeLog = [];
+    let startTime = null;
+    let isPlaying = false;
+    let currentSize = 16;
+    const spacingOptions = [1.0, 1.15, 1.5, 2.0, 2.5];
+    let spacingIndex = 1;
+
+    fabCreate.addEventListener('click', () => {
+        dashboardScreen.style.display = 'none';
+        editorScreen.style.display = 'flex';
+        docTitleInput.value = "Untitled document";
+        editor.innerHTML = "";
+        keystrokeLog = [];
+        startTime = null;
+        updateWordCount();
+        editor.focus();
+    });
+
+    btnBack.addEventListener('click', () => {
+        updateDurationStats();
+        openBottomSheet(lapseBottomSheet);
+    });
+
+    closeLapseSheet.addEventListener('click', () => {
+        closeAllSheets();
+    });
+
+    function openBottomSheet(sheet) {
+        panelOverlay.style.display = 'block';
+        sheet.style.display = 'block';
+    }
+
+    function closeAllSheets() {
+        panelOverlay.style.display = 'none';
+        formatBottomSheet.style.display = 'none';
+        lapseBottomSheet.style.display = 'none';
+    }
+
+    panelOverlay.addEventListener('click', closeAllSheets);
+    closeFormatSheet.addEventListener('click', closeAllSheets);
+    
+    btnOpenFormat.addEventListener('click', () => openBottomSheet(formatBottomSheet));
+    quickFormatSheet.addEventListener('click', () => openBottomSheet(formatBottomSheet));
+
+    function format(command, value = null) {
+        document.execCommand(command, false, value);
+        editor.focus();
+        saveSnapshot();
+        updateToolbarState();
+    }
+
+    quickBold.addEventListener('click', () => format('bold'));
+    sheetBold.addEventListener('click', () => format('bold'));
+    quickItalic.addEventListener('click', () => format('italic'));
+    sheetItalic.addEventListener('click', () => format('italic'));
+    quickUnderline.addEventListener('click', () => format('underline'));
+    sheetUnderline.addEventListener('click', () => format('underline'));
+    sheetStrikethrough.addEventListener('click', () => format('strikeThrough'));
+    sheetSuperscript.addEventListener('click', () => format('superscript'));
+    sheetSubscript.addEventListener('click', () => format('subscript'));
+
+    document.getElementById('quickAlignLeft').addEventListener('click', () => format('justifyLeft'));
+    document.getElementById('sheetAlignLeft').addEventListener('click', () => format('justifyLeft'));
+    document.getElementById('quickAlignCenter').addEventListener('click', () => format('justifyCenter'));
+    document.getElementById('sheetAlignCenter').addEventListener('click', () => format('justifyCenter'));
+    document.getElementById('quickAlignRight').addEventListener('click', () => format('justifyRight'));
+    document.getElementById('sheetAlignRight').addEventListener('click', () => format('justifyRight'));
+    document.getElementById('sheetAlignJustify').addEventListener('click', () => format('justifyFull'));
+    document.getElementById('sheetIndent').addEventListener('click', () => format('indent'));
+    document.getElementById('sheetOutdent').addEventListener('click', () => format('outdent'));
+
+    document.getElementById('quickBulletList').addEventListener('click', () => format('insertUnorderedList'));
+    document.getElementById('quickNumList').addEventListener('click', () => format('insertOrderedList'));
+
+    hiddenColorPicker.addEventListener('input', (e) => {
+        const selectedColor = e.target.value;
+        quickColorLine.style.backgroundColor = selectedColor;
+        format('foreColor', selectedColor);
+    });
+
+    sheetFontFamily.addEventListener('change', () => {
+        format('fontName', sheetFontFamily.value);
+    });
+
+    function applyFontSize() {
+        sizeValue.textContent = currentSize;
+        format('fontSize', '7');
+        const fontElements = editor.getElementsByTagName('font');
+        for (let el of fontElements) {
+            if (el.size === '7') {
+                el.removeAttribute('size');
+                el.style.fontSize = currentSize + 'px';
+            }
+        }
+        saveSnapshot();
+    }
+
+    incSize.addEventListener('click', () => {
+        if (currentSize < 72) { currentSize += 2; applyFontSize(); }
+    });
+    decSize.addEventListener('click', () => {
+        if (currentSize > 8) { currentSize -= 2; applyFontSize(); }
+    });
+
+    function applySpacing() {
+        spacingValue.textContent = spacingOptions[spacingIndex];
+        editor.style.lineHeight = spacingOptions[spacingIndex];
+        playbackArea.style.lineHeight = spacingOptions[spacingIndex];
+        saveSnapshot();
+    }
+
+    incSpacing.addEventListener('click', () => {
+        if (spacingIndex < spacingOptions.length - 1) { spacingIndex++; applySpacing(); }
+    });
+    decSpacing.addEventListener('click', () => {
+        if (spacingIndex > 0) { spacingIndex--; applySpacing(); }
+    });
+
+    document.querySelectorAll('[data-color]').forEach(dot => {
+        dot.addEventListener('click', (e) => {
+            document.querySelectorAll('[data-color]').forEach(d => d.classList.remove('active'));
+            e.target.classList.add('active');
+            const selectedColor = e.target.getAttribute('data-color');
+            hiddenColorPicker.value = selectedColor;
+            quickColorLine.style.backgroundColor = selectedColor;
+            format('foreColor', selectedColor);
+        });
+    });
+
+    document.querySelectorAll('[data-bg]').forEach(dot => {
+        dot.addEventListener('click', (e) => {
+            document.querySelectorAll('[data-bg]').forEach(d => d.classList.remove('active'));
+            e.target.classList.add('active');
+            format('backColor', e.target.getAttribute('data-bg'));
+        });
+    });
+
+    function saveSnapshot() {
+        if (isPlaying) return;
+        if (keystrokeLog.length === 0) {
+            startTime = Date.now();
+        }
+        const relativeTime = Date.now() - startTime;
+        keystrokeLog.push({
+            time: relativeTime,
+            html: editor.innerHTML
+        });
+        updateWordCount();
+    }
+
+    editor.addEventListener('input', saveSnapshot);
+
+    function updateWordCount() {
+        const text = editor.innerText.trim();
+        const words = text ? text.split(/\s+/).length : 0;
+        wordCountMobile.textContent = `${words} words`;
+    }
+
+    function updateDurationStats() {
+        if (keystrokeLog.length === 0) {
+            statsDuration.textContent = "Writing Duration: 0h 0m 0s";
+            return;
+        }
+        const totalMs = keystrokeLog[keystrokeLog.length - 1].time;
+        const totalSeconds = Math.floor(totalMs / 1000);
+        const hours = Math.floor(totalSeconds / 3600);
+        const minutes = Math.floor((totalSeconds % 3600) / 60);
+        const seconds = totalSeconds % 60;
+        statsDuration.textContent = `Writing Duration: ${hours}h ${minutes}m ${seconds}s`;
+    }
+
+    function updateToolbarState() {
+        const isBold = document.queryCommandState('bold');
+        const isItalic = document.queryCommandState('italic');
+        const isUnderline = document.queryCommandState('underline');
+
+        toggleButtonState(quickBold, sheetBold, isBold);
+        toggleButtonState(quickItalic, sheetItalic, isItalic);
+        toggleButtonState(quickUnderline, sheetUnderline, isUnderline);
+    }
+
+    function toggleButtonState(qBtn, sBtn, state) {
+        if (state) {
+            qBtn.classList.add('active');
+            sBtn.classList.add('active');
+        } else {
+            qBtn.classList.remove('active');
+            sBtn.classList.remove('active');
+        }
+    }
+
+    btnLapsePlay.addEventListener('click', () => {
+        if (keystrokeLog.length === 0) {
+            alert("Belum ada rekaman ketikan.");
+            return;
+        }
+
+        closeAllSheets();
+        isPlaying = true;
+        
+        editor.style.display = 'none';
+        playbackArea.style.display = 'block';
+        
+        modeStatusBar.className = "mode-status-bar playback";
+        modeStatusBar.firstElementChild.textContent = "Playing Time-Lapse";
+        
+        playbackArea.innerHTML = "";
+        const speedMultiplier = parseFloat(lapseSpeed.value);
+
+        keystrokeLog.forEach((log) => {
+            const adjustedDelay = log.time / speedMultiplier;
+            setTimeout(() => {
+                if (!isPlaying) return;
+                playbackArea.innerHTML = log.html;
+            }, adjustedDelay);
+        });
+
+        const totalDuration = keystrokeLog[keystrokeLog.length - 1].time / speedMultiplier;
+        setTimeout(() => {
+            if (isPlaying) {
+                alert("Time-lapse selesai.");
+                exitPlaybackMode();
+            }
+        }, totalDuration + 100);
+    });
+
+    btnLapseSave.addEventListener('click', () => {
+        const title = docTitleInput.value.trim() || "Untitled document";
+        const content = editor.innerHTML;
+        const blob = new Blob([content], { type: "text/html" });
+        const a = document.createElement("a");
+        a.href = URL.createObjectURL(blob);
+        a.download = `${title}.html`;
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+        closeAllSheets();
+    });
+
+    btnLapseReset.addEventListener('click', () => {
+        if (confirm("Kembali ke dashboard? Rekaman sesi ini akan hilang.")) {
+            keystrokeLog = [];
+            startTime = null;
+            isPlaying = false;
+            editor.innerHTML = "";
+            playbackArea.innerHTML = "";
+            updateWordCount();
+            closeAllSheets();
+            exitPlaybackMode();
+            dashboardScreen.style.display = 'flex';
+            editorScreen.style.display = 'none';
+        }
+    });
+
+    function exitPlaybackMode() {
+        isPlaying = false;
+        editor.style.display = 'block';
+        playbackArea.style.display = 'none';
+        modeStatusBar.className = "mode-status-bar";
+        modeStatusBar.firstElementChild.textContent = "Recording active";
+        editor.focus();
+    }
+
+    document.getElementById('btnUndo').addEventListener('click', () => format('undo'));
+    document.getElementById('btnRedo').addEventListener('click', () => format('redo'));
+</script>
+
+</body>
+</html>
